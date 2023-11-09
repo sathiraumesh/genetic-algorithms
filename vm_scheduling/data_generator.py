@@ -2,12 +2,12 @@
 import csv 
 import random
 
-def generate_tasks(size = 100):
+def generate_tasks(size = 10000):
   with open('./vm_scheduling/tasks.csv', 'w', newline= '') as file :
     writer = csv.writer(file)
     writer.writerow(["id", "mips"])
     for i in range(size):
-       mips_random = random.randint(10000, 50000)
+       mips_random = random.randint(1000, 10000)
        writer.writerow([i+1, mips_random])
     
 def first_come_serve(): 
@@ -31,21 +31,21 @@ def first_come_serve():
     return task_list
 
 
-def get_cost(vm_list, task_list):
-    makespan = 0.0
-    execution_time_of_vms = dict()
+# def get_cost(vm_list, task_list):
+#     makespan = 0.0
+#     execution_time_of_vms = dict()
     
-    for vm in vm_list: 
-          execution_time_of_vms.update({vm[0]:0})
+#     for vm in vm_list: 
+#           execution_time_of_vms.update({vm[0]:0})
 
-    task_finish_times = []
+#     task_finish_times = []
 
-    for i in range(task_list):
-        task = task_list[i]
-        vm = vm_list[individual[i]]
-        execution_time = task[1]/vm[1] + execution_time_of_vms.get(vm[0])
-        task_finish_times.append(execution_time)
-        execution_time_of_vms.update({vm[0]: execution_time})
+#     for i in range(task_list):
+#         task = task_list[i]
+#         vm = vm_list[individual[i]]
+#         execution_time = task[1]/vm[1] + execution_time_of_vms.get(vm[0])
+#         task_finish_times.append(execution_time)
+#         execution_time_of_vms.update({vm[0]: execution_time})
 
 def read_data(): 
    with open('./vm_scheduling/tasks.csv', 'r') as file :

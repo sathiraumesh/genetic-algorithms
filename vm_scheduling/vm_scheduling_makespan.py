@@ -14,27 +14,30 @@ import vm_scheduling_problem as vmp
 import elitism
 
 # set the random seed for repeatable results
-RANDOM_SEED = 42
-random.seed(RANDOM_SEED)
+# RANDOM_SEED = 42
+# random.seed(RANDOM_SEED)
 
 # create the vm_scheduling make span optimization problem 
-vm_list = [
-        ("vm1", 1000, 30),
-        ("vm2", 2000, 30),
-        ("vm3", 3000, 45),
-        ("vm4", 4000, 34),
-        ("vm5", 5000, 55),
-        ("vm6", 6000, 45)
+vm_list =  vm_list = [
+        ("vm1", 1000, 9.9),
+        ("vm2", 1000, 10),
+        ("vm3", 1000, 10),
+        ("vm4", 2000, 20),
+        ("vm5", 2000, 20),
+        ("vm6", 2000, 20),
+        ("vm7", 3000, 30),
+        ("vm8", 3000, 30),
+        ("vm9", 3000, 30),
     ]
 
 vmp = vmp.VMSchedulingProblem(vm_list)
 
 # genetic algorithm constants:
-POPULATION_SIZE = 300
+POPULATION_SIZE = 500
 MAX_GENERATIONS = 500
 HALL_OF_FAME_SIZE = 30
-P_CROSSOVER = 0.9  # probability for crossover
-P_MUTATION = 0.6   # probability for mutating an individual
+P_CROSSOVER = 0.5  # probability for crossover
+P_MUTATION = 0.4   # probability for mutating an individual
 
 toolbox = base.Toolbox()
 
@@ -55,14 +58,14 @@ toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individual
 
 # fitness calculation - compute the total distance of the list of cities represented by indices:
 def vmMakespan(individual):
-    return vmp.get_makespan(individual),  # return a tuple
+    return vmp.get_multiobjective(individual),  # return a tuple
 
 toolbox.register("evaluate", vmMakespan)
 
 # Genetic operators:
-toolbox.register("select", tools.selTournament, tournsize=200 )
-toolbox.register("mate", tools.cxOrdered)
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=1.0/50)
+toolbox.register("select", tools.selTournament, tournsize=300)
+toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mutate", tools.mutUniformInt, low=0, up=len(vm_list) - 1, indpb=1.0/100)
 
 def main():
     # create initial population (generation 0):
@@ -73,7 +76,6 @@ def main():
     stats.register("min", np.min)
     stats.register("avg", np.mean)
 
-
     # define the hall-of-fame object:
     hof = tools.HallOfFame(HALL_OF_FAME_SIZE)
 
@@ -83,10 +85,18 @@ def main():
 
     # print best individual info:
     best = hof.items[0]
-    print("-- Best Ever Individual = ", best)
+    
+    print("-- Best Ever Individual = ", list(best[1:]))
     print("-- Best Ever Fitness = ", best.fitness.values[0])
-
-
+    print(vmp.get_makespan(list(best[1:])))
+    print(vmp.get_cost_fitness(list(best[1:])))
+    
+    with open('vm_scheduling/output.txt', 'w') as f: 
+        for mapping in list(best[1:]):
+            f.write(str(mapping))
+            f.write('\n')
+        f.close()
+    
     # plot statistics:
     minFitnessValues, meanFitnessValues = logbook.select("min", "avg")
     plt.figure(2)
@@ -99,7 +109,6 @@ def main():
 
     # show both plots:
     plt.show()
-
 
 if __name__ == "__main__":
     main()

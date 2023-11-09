@@ -1,11 +1,12 @@
 import numpy as np
 import random 
+import statistics as sc
 import csv
 
 class VMSchedulingProblem:
 
     def __init__(self, vm_list):
-            self.task_list = self.generate_tasks(number_of_tasks=10000)
+            self.task_list = self.generate_tasks(number_of_tasks=1000)
             self.vm_list = vm_list
             self.vmp_size = len(self.task_list)
 
@@ -14,7 +15,9 @@ class VMSchedulingProblem:
 
     def print_items(self, solution):
         makespan = self.get_makespan(solution)
-        print("makespan = {}, solution = {}".format(makespan, solution))
+        cost = self.get_cost_fitness(solution)
+
+        print("makespan = {}, cost = {}, solution = {}".format(makespan, cost, solution))
 
     def generate_tasks(self, number_of_tasks = 100):
         task_list = []
@@ -30,8 +33,9 @@ class VMSchedulingProblem:
 
     
     def get_makespan(self, individual):
-        makespan = 0.0
+      
         execution_time_of_vms = dict()
+        
         for vm in self.vm_list: 
              execution_time_of_vms.update({vm[0]:0})
         task_finish_times = []
@@ -39,20 +43,82 @@ class VMSchedulingProblem:
         for i in range(len(individual)):
             task = self.task_list[i]
             vm = self.vm_list[individual[i]]
-            execution_time = task[1]/vm[1] + execution_time_of_vms.get(vm[0])
+            execution_time = task[1]/vm[1] +execution_time_of_vms.get(vm[0])
             task_finish_times.append(execution_time)
             execution_time_of_vms.update({vm[0]: execution_time})
-        return max(task_finish_times)
+        return max(task_finish_times) 
+     
+    def get_multiobjective(self, individual):
+
+      execution_time_of_vms = dict()
+
+      for vm in self.vm_list: 
+            execution_time_of_vms.update({vm[0]:0})
+      task_finish_times = []
+     
+      for i in range(len(individual)):
+  
+          task = self.task_list[i]
+          vm = self.vm_list[individual[i]]
+          execution_time = task[1]/vm[1] 
+          task_finish_times.append(execution_time)
+          execution_time_of_vms.update({vm[0]: execution_time})
+      
+      return 1/10*sum(task_finish_times) + self.get_cost(individual)
+    
+    def get_cost(self, individual): 
+      cost = 0.0
+      
+      for i in range(len(individual)):
+          task = self.task_list[i]
+          vm = self.vm_list[individual[i]]
+          
+          task_finish_time = task[1]/vm[1]
+          cost = cost + task_finish_time*vm[2]
+      return cost
+
+    def muti_objective_fitness(self, individual):
+      makespan = 0.0
+      cost = 0.0
+      execution_time_of_vms = dict()
+
+      #update all the vms execution times to 1
+      for vm in self.vm_list: 
+            execution_time_of_vms.update({vm[0]:0})
+      task_finish_times = []
+     
+      for i in range(len(individual)):
+          task = self.task_list[i]
+          vm = self.vm_list[individual[i]]
+          execution_time = task[1]/vm[1] + execution_time_of_vms.get(vm[0])
+          task_finish_times.append(execution_time)
+          execution_time_of_vms.update({vm[0]: execution_time})
+
+      return sum(task_finish_times)
 
 def main():
 
     vm_list = [
         ("vm1", 1000, 30),
-        ("vm2", 2000, 30),
-        ("vm3", 4000, 45),
-        ("vm4", 3000, 34),
-        ("vm5", 4000, 55),
-        ("vm6", 1000, 45)
+        ("vm2", 1000, 30),
+        ("vm3", 1000, 30),
+        ("vm4", 1000, 30),
+        ("vm5", 1000, 30),
+        ("vm6", 2000, 30),
+        ("vm7", 2000, 30),
+        ("vm8", 2000, 30),
+        ("vm9", 2000, 30),
+        ("vm10", 2000, 30),
+        ("vm11", 4000, 45),
+        ("vm12", 4000, 45),
+        ("vm13", 4000, 45),
+        ("vm14", 4000, 45),
+        ("vm15", 4000, 45),
+        ("vm16", 3000, 45),
+        ("vm17", 3000, 34),
+        ("vm18", 3000, 34),
+        ("vm19", 3000, 34),
+        ("vm20", 3000, 34),
     ]
 
     vmp = VMSchedulingProblem(vm_list)
